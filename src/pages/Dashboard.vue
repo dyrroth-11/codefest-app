@@ -1,5 +1,5 @@
 <template>
-  <div :class="[$style.root, $style[$mq]]">
+  <div :class="[$style.root, $style[$mq]]" style="background-color:rgb(1,0,13)">
     <AppBar :shouldShowSideNavigation="true">
       <li slot="dashboard">
         <router-link to="/">

@@ -1,18 +1,36 @@
 <template>
   <div :class="[$style.eventBox, $style[$mq]]">
-    <div :class="$style.title">
-      <span :class="$style.txt">{{ event.title }}</span>
-      <span :class="$style.txt2">
-        <router-link :to="event.link">View Details</router-link>
-      </span>
-    </div>
+    
     <BounceLoader :loading="loading" color="#E47718" :class="$style.loader" />
     <div
       :class="$style.registerWrapper"
       v-if="showRegistration"
       v-show="!loading"
     >
-      <div :class="$style.btnBox">
+    <svg>
+         <defs>
+    <radialGradient id="grad1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:rgb(7,249,254);stop-opacity:0.25" />
+      <stop offset="100%" style="stop-color:rgb(7,249,254);stop-opacity:0.1" />
+    </radialGradient>
+    <linearGradient id="grad2" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:rgb(7,249,254);stop-opacity:0.05" />
+      <stop offset="25%" style="stop-color:rgb(7,249,254);stop-opacity:0.1" />
+      <stop offset="50%" style="stop-color:rgb(7,249,254);stop-opacity:0.22" />
+      <stop offset="75%" style="stop-color:rgb(7,249,254);stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:rgb(7,249,254);stop-opacity:0.05" />
+</linearGradient>
+    
+  </defs>
+      <polygon stroke="#07F9FE" stroke-width="2.5" fill="url(#grad1)" points="0,60 0,280 280,280 320,232 320,12 40,12" >
+      </polygon>
+    <foreignObject x="0" y="52" width="320" height="30">
+          <p :class="$style.txt">{{ event.title }}</p>
+      </foreignObject>
+      <svg x="15%" y="32%">
+      <polygon stroke="#07F9FE" stroke-width="2.2" fill="url(#grad2)" points="0,32 0,55 200,55 220,38 220,12 20,12"></polygon>
+      <foreignObject x="0" y="12" width="220" height="40">
+        <div :class="$style.btnBox">
         <button
           :class="$style.btn"
           @click="displayBtnClick"
@@ -37,14 +55,16 @@
             :data-event-id="event.id"
             @click="submitCreateTeam"
           >
-            <i class="fas fa-arrow-circle-right"></i>
+            <i class="fas fa-arrow-right"></i>
           </button>
         </div>
-      </div>
-      <div :class="$style.orBox">
-        <span>OR</span>
-      </div>
-      <div :class="$style.btnBox">
+        </div>
+    </foreignObject>
+      </svg>
+    <svg x="15%" y="59%">
+      <polygon stroke="#07F9FE" stroke-width="2.2" fill="url(#grad2)" points="0,32 0,55 200,55 220,38 220,12 20,12"></polygon>
+      <foreignObject x="0" y="12" width="220" height="40">
+        <div :class="$style.btnBox">
         <button
           :class="$style.btn"
           @click="displayBtnClick"
@@ -69,9 +89,15 @@
             :data-event-id="event.id"
             @click="submitJoinTeam"
           >
-            <i class="fas fa-arrow-circle-right"></i>
+            <i class="fas fa-arrow-right"></i>
           </button>
         </div>
+        </div>
+    </foreignObject>
+      </svg>
+      </svg>
+      <div :class="$style.btnBox">
+        
       </div>
     </div>
     <div :class="$style.teamWrapper" v-else v-show="!loading">
@@ -119,6 +145,7 @@
       <div :class="$style.teamInfo" v-if="!isTeamValid">* {{ teamInfo }}</div>
     </div>
   </div>
+ 
 </template>
 
 <script>
@@ -174,28 +201,43 @@ export default {
   methods: {
     closeOtherButtons(btn, clickedBtn) {
       if (btn && btn !== clickedBtn) {
+        const inputId = btn.getAttribute("data-input-target");
+        const behindInput = document.getElementById(inputId);
+        btn.focus();
         btn.style.animation = "none";
         btn.classList.remove(this.$style.animateHideBtn);
         // Trigger reflow of element to restart CSS animation (source: https://stackoverflow.com/a/45036752/10623486)
         btn.offsetWidth;
         btn.style.animation = null;
+        behindInput.style.animation = "none";
+        behindInput.classList.remove(this.$style.animateBehindInput);
+        behindInput.offsetWidth;
+        behindInput.style.animation = null;
+       
       }
     },
     displayBtnClick(e) {
+      let y = window.scrollY
+      let x = window.scrollX
       const { target: btn } = e;
       const inputId = btn.getAttribute("data-input-target");
       btn.style.animation = "none";
-      document.getElementById(inputId).focus();
+      const behindInput = document.getElementById(inputId)
+      behindInput.focus();
+      behindInput.classList.add(this.$style.animateBehindInput)
       btn.classList.add(this.$style.animateHideBtn);
       // Trigger reflow of element to restart CSS animation (source: https://stackoverflow.com/a/45036752/10623486)
       btn.offsetWidth;
       btn.style.animation = null;
+      behindInput.offsetWidth;
+      behindInput.style.animation = null;
       eventsStore.events.forEach((event) => {
         const createTeamBtn = document.getElementById(`${event.name}__createTeam`);
         const joinTeamBtn = document.getElementById(`${event.name}__joinTeam`);
         this.closeOtherButtons(createTeamBtn, btn);
         this.closeOtherButtons(joinTeamBtn, btn);
       })
+      window.scrollTo(x, y);
     },
     collectInput(e) {
       if (e.keyCode == 13) {
@@ -299,233 +341,106 @@ export default {
 $box-large-width = 350px;
 $box-small-width = 280px;
 $btn-width = 240px;
-
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active  {
+  transition: background-color 5000s;
+  -webkit-text-fill-color: #07F9FE !important;
+  caret-color: #07F9FE;
+}
 @keyframes animate {
   0% {
     opacity: 1;
-    transform: translateX(0px);
   }
 
   100% {
     opacity: 0;
-    transform: translateX(-300px);
+  }
+}
+@keyframes animate_input {
+  0% {
+    opacity: 0.2;
+  }
+
+  100% {
+    opacity: 1;
   }
 }
 
 .eventBox {
-  --event-team-box-width: $box-large-width;
-  --event-team-button-width: $btn-width;
-  width: var(--event-team-box-width);
-  padding: 10px 10px 20px;
-  box-shadow: var(--box-shadow);
-  background-color: var(--background-color);
-  border-radius: 0 30px;
-
-  &.xs, &.sm {
-    --event-team-box-width: $box-small-width;
+  svg {
+      width: 320px;
+      height: 300px;
   }
-
-  .loader {
-    margin: 20px auto 50px;
-    padding: 5px;
+  .txt{
+        color:#07F9FE;
+        text-align: center;
+        margin-top: 0px;
+        font-size:25px;
+        font-weight: 900;
   }
-
-  .title {
-    height: 50px;
-
-    .txt {
-      $font-size: 20px;
-      font-family: 'Baloo Bhaina 2';
-    }
-
-    .txt2 {
-      float: right;
-      font-weight: 700;
-      $font-size: 14px;
-    }
+  .btn{
+        width:100%;
+        margin-top: 10.5px;
+        outline: none;
+        border: none;
+        background: none;
+        text-align: center;
+        color: #07F9FE;
+        font-size: 20px;
+        cursor:pointer;
+        z-index: 5;
   }
-
-  .btnBox {
-    height: 50px;
-    position: relative;
-    text-align: center;
-    width: var(--event-team-button-width);
-    margin: 0 auto;
-  }
-
-  .btn {
-    position: absolute;
-    z-index: 5;
-    width: 100%;
-    top: 0;
-    left: 0;
-    background-color: var(--background-color);
-    box-shadow: var(--small-icon-shadow);
-    color: $waterloo;
-    font-family: 'Roboto Slab';
-    padding: 10px;
-    $font-size: 20px;
+   .field{
+     width:80%;
+    margin-top: 5px;
+    outline: none;
     border: none;
-    border-radius: 5px;
-    width: inherit;
-
-    &:hover {
-      box-shadow: var(--inset-small-icon-shadow);
-      color: var(--text-color);
-    }
+    background: none;
+    text-align: left;
+    color: #07F9FE;
+    padding-left: 30px;
+    font-size: 20px;
+    caret-shape: block;
   }
-
-  .orBox {
-    text-align: center;
-    display: table;
-    width: 100%;
-    margin: 10px;
-    height: 40px;
-    font-family: QuickSand;
-
-    span {
-      display: table-cell;
-      vertical-align: middle;
-    }
+  #caret{
+    shape:block;
   }
-
-  .field {
-    padding: 5px;
-    clear: both;
-    height: 30px;
-    border: 0;
-    outline: 0;
-    max-width: calc(var(--event-team-button-width) - 50px);
-    color: var(--text-color);
-    box-shadow: var(--inset-box-shadow);
-    background-color: var(--background-color);
-    $font-size: 16px;
-    background: #fff2;
-    border-radius: 5px;
+  ::placeholder {
+    color: #10dfe3;
+    opacity: 1;
   }
-
   .submit {
     border: 0;
     background: transparent;
-    color: var(--text-color);
-    border-radius: 100%;
-    $font-size: 22px;
+    color: #07F9FE;
     height: 40px;
     width: 40px;
+    font-size:19px;
+    font-weight:thin;
     cursor: pointer;
-    text-align: center;
-
     &:hover {
-      color: $vermilion;
+      font-size:20px;
     }
   }
-
   .behindBtn {
-    position: absolute;
-    width: 100%;
-    top: 0;
-    left: 0
+    display:flex;
     z-index: 4;
+    animation-name: animate_input;
+    animation-duration: 4s;
+  }
+  .animateBehindInput{
+    animation-name: animate_input;
+    animation-duration: 1.5s;
   }
 
   .animateHideBtn {
     animation: animate 0.8s forwards;
     cursor: default;
   }
-
   .noAnimate {
     animation: none;
-  }
-
-  .teamWrapper {
-    margin: 5px 20px;
-
-    .teamHeader {
-      text-align: center;
-
-      .validTeam {
-        color: $vermilion;
-      }
-
-      .invalidTeam {
-        color: red;
-      }
-    }
-
-    .memberList {
-      ul {
-        list-style: none;
-      }
-
-      .teamMember {
-        margin-bottom: 5px;
-        vertical-align: middle;
-
-        .removeIcon {
-          color: red;
-          float: right;
-          visibility: hidden;
-          cursor: pointer;
-        }
-
-        &:hover .removeIcon {
-          visibility: visible;
-        }
-      }
-    }
-
-    .teamInfo {
-      $font-size: 18px;
-      text-align: center;
-    }
-
-    .teamLeave {
-      display: block;
-      background: red;
-      margin: 0 auto 5px;
-      color: $white;
-      padding: 5px 15px;
-      border: none;
-      border-radius: 10px;
-    }
-  }
-
-  .infoBox {
-    border: 2px solid $vermilion;
-    border-radius: 10px;
-    height: 40px;
-    text-align: center;
-    vertical-align: middle;
-
-    ~/.xs ^[1..-1], ~/.sm ^[1..-1] {
-      $font-size: 16px;
-    }
-
-    .key {
-      display: inline-block;
-      vertical-align: middle;
-      float: left;
-      border-radius: inherit;
-      border-bottom-right-radius: 0;
-      border-top-right-radius: 0;
-      border-right: 1px solid $vermilion;
-      background: alpha($vermilion, 0.7);
-      height: 100%;
-      padding: 5px;
-    }
-
-    .value {
-      display: inline-block;
-      padding: 5px;
-      height: 100%;
-    }
-  }
-
-  .copyIcon {
-    cursor: pointer;
-    margin-right: 10px;
-    margin-top: 10px;
-    float: right;
   }
 }
 </style>
