@@ -223,7 +223,7 @@ export default {
       const inputId = btn.getAttribute("data-input-target");
       btn.style.animation = "none";
       const behindInput = document.getElementById(inputId)
-      behindInput.focus();
+      this.$nextTick(() => behindInput.focus());
       behindInput.classList.add(this.$style.animateBehindInput)
       btn.classList.add(this.$style.animateHideBtn);
       // Trigger reflow of element to restart CSS animation (source: https://stackoverflow.com/a/45036752/10623486)
